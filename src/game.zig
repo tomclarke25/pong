@@ -3,12 +3,18 @@ const rl = @import("raylib");
 const Config = @import("config.zig").Config;
 const Ball = @import("ball.zig").Ball;
 const Player = @import("player.zig").Player;
+const assert = std.debug.assert;
 
 pub const Game = struct {
     left_player: Player,
     right_player: Player,
     ball: Ball,
     config: *const Config,
+
+    const BOUNDARY_MARGIN: f32 = 10;
+    const BOUNDARY_ROUNDNESS: f32 = 0.01;
+    const BOUNDARY_SEGMENTS: i32 = 2;
+    const BOUNDARY_LINE_THICKNESS: f32 = 4;
 
     pub fn init(config: *const Config) Game {
         return .{
@@ -20,22 +26,20 @@ pub const Game = struct {
     }
 
     pub fn update(self: *Game, delta_time: f32) void {
-        // Player movement
+        assert(delta_time > 0);
         self.right_player.update(delta_time);
         self.left_player.update(delta_time);
 
-        // Ball physics
         self.ball.update(delta_time);
         self.ball.handleWallCollision(self.config.wall_top, self.config.wall_bottom);
 
-        // Paddle collision
+        // Only check collision with paddle the ball is moving toward.
         if (self.ball.velocity.x < 0) {
             self.ball.handlePaddleCollision(self.left_player.paddle);
         } else {
             self.ball.handlePaddleCollision(self.right_player.paddle);
         }
 
-        // Scoring
         if (self.ball.position.x - self.ball.radius < self.config.left_goal) {
             self.ball.reset(rl.Vector2.init(self.config.window_width / 2, self.config.window_height / 2));
             self.right_player.score += 1;
@@ -52,18 +56,14 @@ pub const Game = struct {
 
         rl.clearBackground(rl.Color.black);
 
-        // UI elements
         const scoreboard: [:0]const u8 = rl.textFormat("{ %d : %d }", .{ self.left_player.score, self.right_player.score });
         const text_width: f32 = @floatFromInt(rl.measureText(scoreboard, self.config.scoreboard_font_size));
         const text_x: i32 = @intFromFloat((self.config.window_width - text_width) / 2);
         rl.drawText(scoreboard, text_x, self.config.scoreboard_pos_y, self.config.scoreboard_font_size, rl.Color.green);
-        rl.drawFPS(25, 25);
 
-        // Game boundary
-        const game_boundary: rl.Rectangle = rl.Rectangle.init(10, 10, self.config.window_width - 20, self.config.window_height - 20);
-        rl.drawRectangleRoundedLinesEx(game_boundary, 0.01, 2, 4, rl.Color.green);
+        const game_boundary: rl.Rectangle = rl.Rectangle.init(BOUNDARY_MARGIN, BOUNDARY_MARGIN, self.config.window_width - (BOUNDARY_MARGIN * 2), self.config.window_height - (BOUNDARY_MARGIN * 2));
+        rl.drawRectangleRoundedLinesEx(game_boundary, BOUNDARY_ROUNDNESS, BOUNDARY_SEGMENTS, BOUNDARY_LINE_THICKNESS, rl.Color.green);
 
-        // Game objects
         self.ball.draw();
         self.right_player.draw();
         self.left_player.draw();

@@ -12,7 +12,7 @@ pub const Config = struct {
     paddle_height: f32 = DEFAULT_PADDLE_HEIGHT,
     paddle_colour: rl.Color = rl.Color.green,
     paddle_margin: f32 = 25,
-    paddle_speed_pixels_per_sec: f32 = 300,
+    paddle_speed_pixels_per_sec: f32 = 450,
     paddle_start_pos_y: f32,
 
     // Collision points.

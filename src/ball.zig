@@ -13,7 +13,7 @@ pub const Ball = struct {
 
     const INITIAL_SPEED: f32 = 250;
     const SPEED_INCREMENT: f32 = 15;
-    const MAX_SPEED: f32 = 500;
+    const MAX_SPEED: f32 = 700;
     const INITIAL_ANGLE = 100;
     const MAX_ANGLE_OFFSET = 200;
 

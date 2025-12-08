@@ -17,7 +17,6 @@ pub const Player = struct {
     const PADDLE_SEGMENTS: i32 = 1;
     const PADDLE_LINE_THICKNESS: f32 = 4;
 
-
     pub fn init(position_x: f32, position_y: f32, config: *const Config, up_key: rl.KeyboardKey, down_key: rl.KeyboardKey) Player {
         assert(position_x >= 0);
         assert(position_x <= config.window_width);

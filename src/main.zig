@@ -15,7 +15,6 @@ pub fn main() !void {
 
     rl.setTargetFPS(60);
     while (!rl.windowShouldClose()) {
-
         const delta_time: f32 = rl.getFrameTime();
 
         // Skip update on first frame

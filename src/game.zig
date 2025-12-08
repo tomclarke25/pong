@@ -11,7 +11,6 @@ pub const Game = struct {
     ball: Ball,
     config: *const Config,
     serve_delay_timer: f32 = 0,
-    game_winner: ?enum { left, right } = null,
 
     const BOUNDARY_MARGIN: f32 = 10;
     const BOUNDARY_ROUNDNESS: f32 = 0.01;
@@ -60,11 +59,21 @@ pub const Game = struct {
             self.ball.reset(rl.Vector2.init(self.config.window_width / 2, self.config.window_height / 2));
             self.right_player.score += 1;
             self.serve_delay_timer = SERVE_DELAY_SECONDS;
+            if (self.right_player.score >= WINNING_SCORE) {
+                self.right_player.score = 0;
+                self.left_player.score = 0;
+                return;
+            }
         }
         if (self.ball.position.x + self.ball.radius > self.config.right_goal) {
             self.ball.reset(rl.Vector2.init(self.config.window_width / 2, self.config.window_height / 2));
             self.left_player.score += 1;
             self.serve_delay_timer = SERVE_DELAY_SECONDS;
+            if (self.left_player.score >= WINNING_SCORE) {
+                self.right_player.score = 0;
+                self.left_player.score = 0;
+                return;
+            }
         }
     }
 

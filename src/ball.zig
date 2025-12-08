@@ -22,9 +22,10 @@ pub const Ball = struct {
         assert(position_x <= config.window_width);
         assert(position_y >= 0);
         assert(position_y <= config.window_height);
+        const rand = std.crypto.random.float(f32);
         return .{
             .position = rl.Vector2.init(position_x, position_y),
-            .velocity = rl.Vector2.init(INITIAL_SPEED, INITIAL_ANGLE),
+            .velocity = rl.Vector2.init(INITIAL_SPEED, INITIAL_ANGLE * ((rand * 2) - 1)),
             .config = config,
             .speed = INITIAL_SPEED,
         };
@@ -44,9 +45,20 @@ pub const Ball = struct {
     }
 
     pub fn reset(self: *Ball, reset_point: rl.Vector2) void {
+        const angle_factor_random = std.crypto.random.float(f32);
+        const direction_multiplier = (angle_factor_random * 2) - 1;
         self.position = reset_point;
-        self.velocity.x = -self.velocity.x;
+
+        const serve_direction: f32 = if (self.velocity.x > 0) -1 else 1;
+
+        self.velocity.x = serve_direction * INITIAL_SPEED;
+        self.velocity.y = MAX_ANGLE_OFFSET * direction_multiplier;
+
+        const magnitude = @sqrt(self.velocity.x * self.velocity.x + self.velocity.y * self.velocity.y);
         self.speed = INITIAL_SPEED;
+        self.velocity.x = (self.velocity.x / magnitude) * self.speed;
+        self.velocity.y = (self.velocity.y / magnitude) * self.speed;
+
         assert(self.speed == INITIAL_SPEED);
     }
 

@@ -15,6 +15,9 @@ pub const Game = struct {
     const BOUNDARY_ROUNDNESS: f32 = 0.01;
     const BOUNDARY_SEGMENTS: i32 = 2;
     const BOUNDARY_LINE_THICKNESS: f32 = 4;
+    const CENTER_LINE_DASH_LENGTH: f32 = 10;
+    const CENTER_LINE_DASH_SPACING: f32 = 20;
+    const CENTER_LINE_DASH_COLOUR: rl.Color = rl.Color.green;
 
     pub fn init(config: *const Config) Game {
         return .{
@@ -63,6 +66,21 @@ pub const Game = struct {
 
         const game_boundary: rl.Rectangle = rl.Rectangle.init(BOUNDARY_MARGIN, BOUNDARY_MARGIN, self.config.window_width - (BOUNDARY_MARGIN * 2), self.config.window_height - (BOUNDARY_MARGIN * 2));
         rl.drawRectangleRoundedLinesEx(game_boundary, BOUNDARY_ROUNDNESS, BOUNDARY_SEGMENTS, BOUNDARY_LINE_THICKNESS, rl.Color.green);
+
+        // Temporary dashed line until drawLineDashed is merged into raylib-zig
+        var dash_y: f32 = BOUNDARY_MARGIN;
+        const dash_end_y: f32 = self.config.window_height - BOUNDARY_MARGIN;
+        const center_x: f32 = self.config.window_width / 2;
+        while (dash_y < dash_end_y) : (dash_y += CENTER_LINE_DASH_SPACING) {
+            rl.drawLineEx(
+                rl.Vector2.init(center_x, dash_y),
+                rl.Vector2.init(center_x, dash_y + CENTER_LINE_DASH_LENGTH),
+                BOUNDARY_LINE_THICKNESS,
+                CENTER_LINE_DASH_COLOUR
+            );
+        }
+
+
 
         self.ball.draw();
         self.right_player.draw();

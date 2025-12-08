@@ -18,7 +18,10 @@ pub fn main() !void {
 
         const delta_time: f32 = rl.getFrameTime();
 
-        game.update(delta_time);
+        // Skip update on first frame
+        if (delta_time > 0) {
+            game.update(delta_time);
+        }
 
         game.render();
     }

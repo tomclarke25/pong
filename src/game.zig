@@ -20,7 +20,7 @@ pub const Game = struct {
 
     const CENTER_LINE_DASH_LENGTH: f32 = 10;
     const CENTER_LINE_DASH_SPACING: f32 = 20;
-    const CENTER_LINE_DASH_COLOUR: rl.Color = rl.Color.red;
+    const CENTER_LINE_DASH_COLOUR: rl.Color = rl.Color.green;
 
     const SERVE_DELAY_SECONDS: f32 = 0.3;
     const WINNING_SCORE: i32 = 5;
@@ -77,10 +77,10 @@ pub const Game = struct {
         const scoreboard: [:0]const u8 = rl.textFormat("{ %d : %d }", .{ self.left_player.score, self.right_player.score });
         const text_width: f32 = @floatFromInt(rl.measureText(scoreboard, self.config.scoreboard_font_size));
         const text_x: i32 = @intFromFloat((self.config.window_width - text_width) / 2);
-        rl.drawText(scoreboard, text_x, self.config.scoreboard_pos_y, self.config.scoreboard_font_size, rl.Color.red);
+        rl.drawText(scoreboard, text_x, self.config.scoreboard_pos_y, self.config.scoreboard_font_size, rl.Color.green);
 
         const game_boundary: rl.Rectangle = rl.Rectangle.init(BOUNDARY_MARGIN, BOUNDARY_MARGIN, self.config.window_width - (BOUNDARY_MARGIN * 2), self.config.window_height - (BOUNDARY_MARGIN * 2));
-        rl.drawRectangleRoundedLinesEx(game_boundary, BOUNDARY_ROUNDNESS, BOUNDARY_SEGMENTS, BOUNDARY_LINE_THICKNESS, rl.Color.red);
+        rl.drawRectangleRoundedLinesEx(game_boundary, BOUNDARY_ROUNDNESS, BOUNDARY_SEGMENTS, BOUNDARY_LINE_THICKNESS, rl.Color.green);
 
         // Temporary dashed line until drawLineDashed is merged into raylib-zig
         var dash_y: f32 = BOUNDARY_MARGIN;

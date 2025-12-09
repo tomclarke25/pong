@@ -1,6 +1,6 @@
 const rl = @import("raylib");
-const Config = @import("config.zig").Config;
 const std = @import("std");
+const constants = @import("constants.zig");
 const assert = std.debug.assert;
 
 pub const Ball = struct {
@@ -8,7 +8,6 @@ pub const Ball = struct {
     velocity: rl.Vector2,
     radius: f32 = 10,
     colour: rl.Color = rl.Color.green,
-    config: *const Config,
     speed: f32,
 
     const INITIAL_SPEED: f32 = 250;
@@ -17,16 +16,15 @@ pub const Ball = struct {
     const INITIAL_ANGLE = 100;
     const MAX_ANGLE_OFFSET = 200;
 
-    pub fn init(position_x: f32, position_y: f32, config: *const Config) Ball {
+    pub fn init(position_x: f32, position_y: f32) Ball {
         assert(position_x >= 0);
-        assert(position_x <= config.window_width);
+        assert(position_x <= constants.window_width);
         assert(position_y >= 0);
-        assert(position_y <= config.window_height);
+        assert(position_y <= constants.window_height);
         const rand = std.crypto.random.float(f32);
         return .{
             .position = rl.Vector2.init(position_x, position_y),
             .velocity = rl.Vector2.init(INITIAL_SPEED, INITIAL_ANGLE * ((rand * 2) - 1)),
-            .config = config,
             .speed = INITIAL_SPEED,
         };
     }
@@ -38,9 +36,9 @@ pub const Ball = struct {
 
     pub fn draw(self: Ball) void {
         assert(self.position.x > 0);
-        assert(self.position.x < self.config.window_width);
+        assert(self.position.x < constants.window_width);
         assert(self.position.y > 0);
-        assert(self.position.y < self.config.window_height);
+        assert(self.position.y < constants.window_height);
         rl.drawCircleV(self.position, self.radius, self.colour);
     }
 
@@ -58,8 +56,6 @@ pub const Ball = struct {
         self.speed = INITIAL_SPEED;
         self.velocity.x = (self.velocity.x / magnitude) * self.speed;
         self.velocity.y = (self.velocity.y / magnitude) * self.speed;
-
-        assert(self.speed == INITIAL_SPEED);
     }
 
     pub fn handleWallCollision(self: *Ball, wall_top: f32, wall_bottom: f32) void {

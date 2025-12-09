@@ -1,18 +1,17 @@
 const std = @import("std");
 const rl = @import("raylib");
-const Config = @import("config.zig").Config;
+const constants = @import("constants.zig");
 const Ball = @import("ball.zig").Ball;
 const Player = @import("player.zig").Player;
+const player = @import("player.zig");
 const assert = std.debug.assert;
 
 pub const Game = struct {
     left_player: Player,
     right_player: Player,
     ball: Ball,
-    config: *const Config,
     serve_delay_timer: f32 = 0,
 
-    const BOUNDARY_MARGIN: f32 = 10;
     const BOUNDARY_ROUNDNESS: f32 = 0.01;
     const BOUNDARY_SEGMENTS: i32 = 2;
     const BOUNDARY_LINE_THICKNESS: f32 = 4;
@@ -21,15 +20,20 @@ pub const Game = struct {
     const CENTER_LINE_DASH_SPACING: f32 = 20;
     const CENTER_LINE_DASH_COLOUR: rl.Color = rl.Color.green;
 
+    const SCOREBOARD_FONT_SIZE: i32 = 40;
+    const SCOREBOARD_POS_Y: i32 = 25;
+
     const SERVE_DELAY_SECONDS: f32 = 0.3;
     const WINNING_SCORE: i32 = 5;
 
-    pub fn init(config: *const Config) Game {
+    pub fn init() Game {
+        const paddle_start_y = (constants.window_height / 2.0) - (player.paddle_height / 2.0);
+        const right_paddle_x = constants.window_width - player.paddle_margin - player.paddle_width;
+
         return .{
-            .left_player = Player.init(config.paddle_margin, config.paddle_start_pos_y, config, rl.KeyboardKey.w, rl.KeyboardKey.s),
-            .right_player = Player.init(config.window_width - config.paddle_margin - config.paddle_width, config.paddle_start_pos_y, config, rl.KeyboardKey.up, rl.KeyboardKey.down),
-            .ball = Ball.init(config.window_width / 2, config.window_height / 2, config),
-            .config = config,
+            .left_player = Player.init(player.paddle_margin, paddle_start_y, rl.KeyboardKey.w, rl.KeyboardKey.s),
+            .right_player = Player.init(right_paddle_x, paddle_start_y, rl.KeyboardKey.up, rl.KeyboardKey.down),
+            .ball = Ball.init(constants.window_width / 2, constants.window_height / 2),
             .serve_delay_timer = SERVE_DELAY_SECONDS,
         };
     }
@@ -46,7 +50,10 @@ pub const Game = struct {
         }
 
         self.ball.update(delta_time);
-        self.ball.handleWallCollision(self.config.wall_top, self.config.wall_bottom);
+
+        const wall_top = constants.wall_margin;
+        const wall_bottom = constants.window_height - constants.wall_margin;
+        self.ball.handleWallCollision(wall_top, wall_bottom);
 
         // Only check collision with paddle the ball is moving toward.
         if (self.ball.velocity.x < 0) {
@@ -55,8 +62,12 @@ pub const Game = struct {
             self.ball.handlePaddleCollision(self.right_player.paddle);
         }
 
-        if (self.ball.position.x - self.ball.radius < self.config.left_goal) {
-            self.ball.reset(rl.Vector2.init(self.config.window_width / 2, self.config.window_height / 2));
+        const left_goal = constants.wall_margin;
+        const right_goal = constants.window_width - constants.wall_margin;
+        const reset_point = rl.Vector2.init(constants.window_width / 2, constants.window_height / 2);
+
+        if (self.ball.position.x - self.ball.radius < left_goal) {
+            self.ball.reset(reset_point);
             self.right_player.score += 1;
             self.serve_delay_timer = SERVE_DELAY_SECONDS;
             if (self.right_player.score >= WINNING_SCORE) {
@@ -65,8 +76,8 @@ pub const Game = struct {
                 return;
             }
         }
-        if (self.ball.position.x + self.ball.radius > self.config.right_goal) {
-            self.ball.reset(rl.Vector2.init(self.config.window_width / 2, self.config.window_height / 2));
+        if (self.ball.position.x + self.ball.radius > right_goal) {
+            self.ball.reset(reset_point);
             self.left_player.score += 1;
             self.serve_delay_timer = SERVE_DELAY_SECONDS;
             if (self.left_player.score >= WINNING_SCORE) {
@@ -84,17 +95,17 @@ pub const Game = struct {
         rl.clearBackground(rl.Color.black);
 
         const scoreboard: [:0]const u8 = rl.textFormat("{ %d : %d }", .{ self.left_player.score, self.right_player.score });
-        const text_width: f32 = @floatFromInt(rl.measureText(scoreboard, self.config.scoreboard_font_size));
-        const text_x: i32 = @intFromFloat((self.config.window_width - text_width) / 2);
-        rl.drawText(scoreboard, text_x, self.config.scoreboard_pos_y, self.config.scoreboard_font_size, rl.Color.green);
+        const text_width: f32 = @floatFromInt(rl.measureText(scoreboard, SCOREBOARD_FONT_SIZE));
+        const text_x: i32 = @intFromFloat((constants.window_width - text_width) / 2);
+        rl.drawText(scoreboard, text_x, SCOREBOARD_POS_Y, SCOREBOARD_FONT_SIZE, rl.Color.green);
 
-        const game_boundary: rl.Rectangle = rl.Rectangle.init(BOUNDARY_MARGIN, BOUNDARY_MARGIN, self.config.window_width - (BOUNDARY_MARGIN * 2), self.config.window_height - (BOUNDARY_MARGIN * 2));
+        const game_boundary: rl.Rectangle = rl.Rectangle.init(constants.wall_margin, constants.wall_margin, constants.window_width - (constants.wall_margin * 2), constants.window_height - (constants.wall_margin * 2));
         rl.drawRectangleRoundedLinesEx(game_boundary, BOUNDARY_ROUNDNESS, BOUNDARY_SEGMENTS, BOUNDARY_LINE_THICKNESS, rl.Color.green);
 
-        // Temporary dashed line until drawLineDashed is merged into raylib-zig
-        var dash_y: f32 = BOUNDARY_MARGIN;
-        const dash_end_y: f32 = self.config.window_height - BOUNDARY_MARGIN;
-        const center_x: f32 = self.config.window_width / 2;
+        // Temporary dashed line until drawLineDashed is merged into raylib-zig.
+        var dash_y: f32 = constants.wall_margin;
+        const dash_end_y: f32 = constants.window_height - constants.wall_margin;
+        const center_x: f32 = constants.window_width / 2;
         while (dash_y < dash_end_y) : (dash_y += CENTER_LINE_DASH_SPACING) {
             rl.drawLineEx(rl.Vector2.init(center_x, dash_y), rl.Vector2.init(center_x, dash_y + CENTER_LINE_DASH_LENGTH), BOUNDARY_LINE_THICKNESS, CENTER_LINE_DASH_COLOUR);
         }

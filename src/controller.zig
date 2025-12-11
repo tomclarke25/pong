@@ -6,11 +6,11 @@ const Action = @import("action.zig").Action;
 pub const Controller = union(enum) {
     human_controller: HumanController,
     tracker_ai_controller: TrackerAIController,
-    
-    pub fn selectAction(self: *Controller, game_view: GameView) Action {
+
+    pub fn selectAction(self: *Controller, game_view: GameView, delta_time: f32) Action {
         return switch (self.*) {
             .human_controller => |*h| h.selectAction(),
-            .tracker_ai_controller => |_| TrackerAIController.selectAction(game_view),
+            .tracker_ai_controller => |*t| t.selectAction(game_view, delta_time),
         };
     }
 };

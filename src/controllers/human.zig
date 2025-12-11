@@ -11,7 +11,7 @@ pub const HumanController = struct {
             .down_key = down_key,
         };
     }
-    
+
     pub fn selectAction(self: *HumanController) Action {
         if (rl.isKeyDown(self.up_key) and !rl.isKeyDown(self.down_key)) {
             return .up;

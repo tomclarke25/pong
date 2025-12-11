@@ -4,6 +4,8 @@ const constants = @import("constants.zig");
 const Ball = @import("ball.zig").Ball;
 const Player = @import("player.zig").Player;
 const player = @import("player.zig");
+const Controller = @import("controller.zig").Controller;
+const GameView = @import("game_view.zig").GameView;
 const assert = std.debug.assert;
 
 pub const Game = struct {
@@ -11,6 +13,8 @@ pub const Game = struct {
     right_player: Player,
     ball: Ball,
     serve_delay_timer: f32 = 0,
+    left_controller: Controller,
+    right_controller: Controller,
 
     const BOUNDARY_ROUNDNESS: f32 = 0.01;
     const BOUNDARY_SEGMENTS: i32 = 2;
@@ -26,13 +30,15 @@ pub const Game = struct {
     const SERVE_DELAY_SECONDS: f32 = 0.3;
     const WINNING_SCORE: i32 = 5;
 
-    pub fn init() Game {
+    pub fn init(left_controller: Controller, right_controller: Controller) Game {
         const paddle_start_y = (constants.window_height / 2.0) - (player.paddle_height / 2.0);
         const right_paddle_x = constants.window_width - player.paddle_margin - player.paddle_width;
 
         return .{
-            .left_player = Player.init(player.paddle_margin, paddle_start_y, rl.KeyboardKey.w, rl.KeyboardKey.s),
-            .right_player = Player.init(right_paddle_x, paddle_start_y, rl.KeyboardKey.up, rl.KeyboardKey.down),
+            .left_player = Player.init(player.paddle_margin, paddle_start_y),
+            .right_player = Player.init(right_paddle_x, paddle_start_y),
+            .left_controller = left_controller,
+            .right_controller = right_controller,
             .ball = Ball.init(constants.window_width / 2, constants.window_height / 2),
             .serve_delay_timer = SERVE_DELAY_SECONDS,
         };
@@ -41,8 +47,11 @@ pub const Game = struct {
     pub fn update(self: *Game, delta_time: f32) void {
         assert(delta_time > 0);
 
-        self.right_player.update(delta_time);
-        self.left_player.update(delta_time);
+        const left_view: GameView = self.createGameView(&self.left_player, .left);
+        const right_view: GameView = self.createGameView(&self.right_player, .right);
+
+        self.right_player.update(delta_time, self.right_controller.selectAction(right_view));
+        self.left_player.update(delta_time, self.left_controller.selectAction(left_view));
 
         if (self.serve_delay_timer > 0) {
             self.serve_delay_timer -= delta_time;
@@ -113,5 +122,24 @@ pub const Game = struct {
         self.ball.draw();
         self.right_player.draw();
         self.left_player.draw();
+    }
+
+    fn createGameView(self: *const Game, paddle: *const Player, player_side: enum { left, right }) GameView {
+        const wall_top = constants.wall_margin;
+        const wall_bottom = constants.window_height - constants.wall_margin;
+        const target_x: f32 = switch (player_side) {
+            .left => paddle.paddle.x + paddle.paddle.width + self.ball.radius,
+            .right => paddle.paddle.x - self.ball.radius,
+        };
+
+        return GameView.init(
+            self.ball.position,
+            self.ball.velocity,
+            self.ball.radius,
+            target_x,
+            wall_top,
+            wall_bottom,
+            paddle.getPaddleCenterY()
+        );
     }
 };

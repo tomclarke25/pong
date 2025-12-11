@@ -35,8 +35,8 @@ pub const Game = struct {
         const right_paddle_x = constants.window_width - player.paddle_margin - player.paddle_width;
 
         return .{
-            .left_player = Player.init(player.paddle_margin, paddle_start_y),
-            .right_player = Player.init(right_paddle_x, paddle_start_y),
+            .left_player = Player.init(player.paddle_margin, paddle_start_y, left_controller.getSpeedMultiplier()),
+            .right_player = Player.init(right_paddle_x, paddle_start_y, right_controller.getSpeedMultiplier()),
             .left_controller = left_controller,
             .right_controller = right_controller,
             .ball = Ball.init(constants.window_width / 2, constants.window_height / 2),
@@ -46,12 +46,6 @@ pub const Game = struct {
 
     pub fn update(self: *Game, delta_time: f32) void {
         assert(delta_time > 0);
-
-        const left_view: GameView = self.createGameView(&self.left_player, .left);
-        const right_view: GameView = self.createGameView(&self.right_player, .right);
-
-        self.right_player.update(delta_time, self.right_controller.selectAction(right_view));
-        self.left_player.update(delta_time, self.left_controller.selectAction(left_view));
 
         if (self.serve_delay_timer > 0) {
             self.serve_delay_timer -= delta_time;
@@ -95,6 +89,12 @@ pub const Game = struct {
                 return;
             }
         }
+
+        const left_view: GameView = self.createGameView(&self.left_player, .left);
+        const right_view: GameView = self.createGameView(&self.right_player, .right);
+
+        self.right_player.update(delta_time, self.right_controller.selectAction(right_view, delta_time));
+        self.left_player.update(delta_time, self.left_controller.selectAction(left_view, delta_time));
     }
 
     pub fn render(self: *const Game) void {
@@ -131,6 +131,10 @@ pub const Game = struct {
             .left => paddle.paddle.x + paddle.paddle.width + self.ball.radius,
             .right => paddle.paddle.x - self.ball.radius,
         };
+        const ball_approaching = switch (player_side) {
+            .left => self.ball.velocity.x < 0 and self.ball.position.x > target_x,
+            .right => self.ball.velocity.x > 0 and self.ball.position.x < target_x,
+        };
 
         return GameView.init(
             self.ball.position,
@@ -139,7 +143,8 @@ pub const Game = struct {
             target_x,
             wall_top,
             wall_bottom,
-            paddle.getPaddleCenterY()
+            paddle.getPaddleCenterY(),
+            ball_approaching,
         );
     }
 };

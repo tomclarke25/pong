@@ -18,7 +18,7 @@ pub fn predictBallY(
     const bound_bottom = wall_bottom - ball_radius;
     const height_playable = bound_bottom - bound_top;
 
-    // assert(time_to_intercept > 0);
+    assert(time_to_intercept > 0);
     assert(height_playable > 0);
 
     const y_raw = ball_position.y + (ball_velocity.y * time_to_intercept);

@@ -7,7 +7,8 @@ pub const GameView = struct {
     target_x: f32,
     wall_top: f32,
     wall_bottom: f32,
-    current_paddle_position_y: f32,
+    paddle_center_y: f32,
+    ball_approaching: bool,
 
     pub fn init(
         ball_position: rl.Vector2,
@@ -16,7 +17,8 @@ pub const GameView = struct {
         target_x: f32,
         wall_top: f32,
         wall_bottom: f32,
-        current_paddle_position_y: f32,
+        paddle_center_y: f32,
+        ball_approaching: bool,
     ) GameView {
         return .{
             .ball_position = ball_position,
@@ -25,7 +27,8 @@ pub const GameView = struct {
             .target_x = target_x,
             .wall_top = wall_top,
             .wall_bottom = wall_bottom,
-            .current_paddle_position_y = current_paddle_position_y,
+            .paddle_center_y = paddle_center_y,
+            .ball_approaching = ball_approaching,
         };
     }
 };

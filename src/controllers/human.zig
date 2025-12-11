@@ -4,6 +4,7 @@ const Action = @import("../action.zig").Action;
 pub const HumanController = struct {
     up_key: rl.KeyboardKey,
     down_key: rl.KeyboardKey,
+    speed_multiplier: f32 = 1.0,
 
     pub fn init(up_key: rl.KeyboardKey, down_key: rl.KeyboardKey) HumanController {
         return .{

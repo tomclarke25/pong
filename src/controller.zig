@@ -13,4 +13,11 @@ pub const Controller = union(enum) {
             .tracker_ai_controller => |*t| t.selectAction(game_view, delta_time),
         };
     }
+
+    pub fn getSpeedMultiplier(self: Controller) f32 {
+        return switch (self) {
+            .human_controller => |h| h.speed_multiplier,
+            .tracker_ai_controller => |t| t.getSpeedMultiplier(),
+        };
+    }
 };

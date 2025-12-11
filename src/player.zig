@@ -15,13 +15,14 @@ pub const Player = struct {
     score: i32 = 0,
     paddle_lower_bound: f32,
     paddle_upper_bound: f32,
+    paddle_speed_multiplier: f32,
 
     const PADDLE_WALL_GAP: f32 = 30;
     const PADDLE_ROUNDNESS: f32 = 0.01;
     const PADDLE_SEGMENTS: i32 = 1;
     const PADDLE_LINE_THICKNESS: f32 = 4;
 
-    pub fn init(position_x: f32, position_y: f32) Player {
+    pub fn init(position_x: f32, position_y: f32, paddle_speed_multiplier: f32) Player {
         assert(position_x >= 0);
         assert(position_x <= constants.window_width);
         assert(position_y >= 0);
@@ -33,6 +34,7 @@ pub const Player = struct {
             .paddle = rl.Rectangle.init(position_x, position_y, paddle_width, paddle_height),
             .paddle_lower_bound = wall_top + PADDLE_WALL_GAP,
             .paddle_upper_bound = wall_bottom - paddle_height,
+            .paddle_speed_multiplier = paddle_speed_multiplier,
         };
     }
 
@@ -50,10 +52,10 @@ pub const Player = struct {
         assert(delta_time > 0);
 
         if (move_action == .up) {
-            self.paddle.y -= paddle_speed_pixels_per_sec * delta_time;
+            self.paddle.y -= paddle_speed_pixels_per_sec * delta_time * self.paddle_speed_multiplier;
         }
         if (move_action == .down) {
-            self.paddle.y += paddle_speed_pixels_per_sec * delta_time;
+            self.paddle.y += paddle_speed_pixels_per_sec * delta_time * self.paddle_speed_multiplier;
         }
         // Top-only gap mimics the original Pong hardware bug.
         self.paddle.y = std.math.clamp(self.paddle.y, self.paddle_lower_bound, self.paddle_upper_bound);

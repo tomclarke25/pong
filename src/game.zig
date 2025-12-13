@@ -16,19 +16,19 @@ pub const Game = struct {
     left_controller: Controller,
     right_controller: Controller,
 
-    const BOUNDARY_ROUNDNESS: f32 = 0.01;
-    const BOUNDARY_SEGMENTS: i32 = 2;
-    const BOUNDARY_LINE_THICKNESS: f32 = 4;
+    const boundary_roundness: f32 = 0.01;
+    const boundary_segments: i32 = 2;
+    const boundary_line_thickness: f32 = 4;
 
-    const CENTER_LINE_DASH_LENGTH: f32 = 10;
-    const CENTER_LINE_DASH_SPACING: f32 = 20;
-    const CENTER_LINE_DASH_COLOUR: rl.Color = rl.Color.green;
+    const center_line_dash_length: f32 = 10;
+    const center_line_dash_spacing: f32 = 20;
+    const center_line_dash_colour: rl.Color = rl.Color.green;
 
-    const SCOREBOARD_FONT_SIZE: i32 = 40;
-    const SCOREBOARD_POS_Y: i32 = 25;
+    const scoreboard_font_size: i32 = 40;
+    const scoreboard_pos_y: i32 = 25;
 
-    const SERVE_DELAY_SECONDS: f32 = 0.3;
-    const WINNING_SCORE: i32 = 5;
+    const serve_delay_seconds: f32 = 0.3;
+    const winning_score: i32 = 5;
 
     pub fn init(left_controller: Controller, right_controller: Controller) Game {
         const paddle_start_y = (constants.window_height / 2.0) - (player.paddle_height / 2.0);
@@ -40,7 +40,7 @@ pub const Game = struct {
             .left_controller = left_controller,
             .right_controller = right_controller,
             .ball = Ball.init(constants.window_width / 2, constants.window_height / 2),
-            .serve_delay_timer = SERVE_DELAY_SECONDS,
+            .serve_delay_timer = serve_delay_seconds,
         };
     }
 
@@ -72,8 +72,8 @@ pub const Game = struct {
         if (self.ball.position.x - self.ball.radius < left_goal) {
             self.ball.reset(reset_point);
             self.right_player.score += 1;
-            self.serve_delay_timer = SERVE_DELAY_SECONDS;
-            if (self.right_player.score >= WINNING_SCORE) {
+            self.serve_delay_timer = serve_delay_seconds;
+            if (self.right_player.score >= winning_score) {
                 self.right_player.score = 0;
                 self.left_player.score = 0;
                 return;
@@ -82,8 +82,8 @@ pub const Game = struct {
         if (self.ball.position.x + self.ball.radius > right_goal) {
             self.ball.reset(reset_point);
             self.left_player.score += 1;
-            self.serve_delay_timer = SERVE_DELAY_SECONDS;
-            if (self.left_player.score >= WINNING_SCORE) {
+            self.serve_delay_timer = serve_delay_seconds;
+            if (self.left_player.score >= winning_score) {
                 self.right_player.score = 0;
                 self.left_player.score = 0;
                 return;
@@ -104,19 +104,19 @@ pub const Game = struct {
         rl.clearBackground(rl.Color.black);
 
         const scoreboard: [:0]const u8 = rl.textFormat("{ %d : %d }", .{ self.left_player.score, self.right_player.score });
-        const text_width: f32 = @floatFromInt(rl.measureText(scoreboard, SCOREBOARD_FONT_SIZE));
+        const text_width: f32 = @floatFromInt(rl.measureText(scoreboard, scoreboard_font_size));
         const text_x: i32 = @intFromFloat((constants.window_width - text_width) / 2);
-        rl.drawText(scoreboard, text_x, SCOREBOARD_POS_Y, SCOREBOARD_FONT_SIZE, rl.Color.green);
+        rl.drawText(scoreboard, text_x, scoreboard_pos_y, scoreboard_font_size, rl.Color.green);
 
         const game_boundary: rl.Rectangle = rl.Rectangle.init(constants.wall_margin, constants.wall_margin, constants.window_width - (constants.wall_margin * 2), constants.window_height - (constants.wall_margin * 2));
-        rl.drawRectangleRoundedLinesEx(game_boundary, BOUNDARY_ROUNDNESS, BOUNDARY_SEGMENTS, BOUNDARY_LINE_THICKNESS, rl.Color.green);
+        rl.drawRectangleRoundedLinesEx(game_boundary, boundary_roundness, boundary_segments, boundary_line_thickness, rl.Color.green);
 
         // Temporary dashed line until drawLineDashed is merged into raylib-zig.
         var dash_y: f32 = constants.wall_margin;
         const dash_end_y: f32 = constants.window_height - constants.wall_margin;
         const center_x: f32 = constants.window_width / 2;
-        while (dash_y < dash_end_y) : (dash_y += CENTER_LINE_DASH_SPACING) {
-            rl.drawLineEx(rl.Vector2.init(center_x, dash_y), rl.Vector2.init(center_x, dash_y + CENTER_LINE_DASH_LENGTH), BOUNDARY_LINE_THICKNESS, CENTER_LINE_DASH_COLOUR);
+        while (dash_y < dash_end_y) : (dash_y += center_line_dash_spacing) {
+            rl.drawLineEx(rl.Vector2.init(center_x, dash_y), rl.Vector2.init(center_x, dash_y + center_line_dash_length), boundary_line_thickness, center_line_dash_colour);
         }
 
         self.ball.draw();

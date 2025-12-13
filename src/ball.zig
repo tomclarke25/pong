@@ -10,11 +10,11 @@ pub const Ball = struct {
     colour: rl.Color = rl.Color.green,
     speed: f32,
 
-    const INITIAL_SPEED: f32 = 250;
-    const SPEED_INCREMENT: f32 = 15;
-    const MAX_SPEED: f32 = 700;
-    const INITIAL_ANGLE = 100;
-    const MAX_ANGLE_OFFSET = 200;
+    const initial_speed: f32 = 250;
+    const speed_increment: f32 = 15;
+    const max_speed: f32 = 700;
+    const initial_angle = 100;
+    const max_angle_offset = 200;
 
     pub fn init(position_x: f32, position_y: f32) Ball {
         assert(position_x >= 0);
@@ -24,8 +24,8 @@ pub const Ball = struct {
         const rand = std.crypto.random.float(f32);
         return .{
             .position = rl.Vector2.init(position_x, position_y),
-            .velocity = rl.Vector2.init(INITIAL_SPEED, INITIAL_ANGLE * ((rand * 2) - 1)),
-            .speed = INITIAL_SPEED,
+            .velocity = rl.Vector2.init(initial_speed, initial_angle * ((rand * 2) - 1)),
+            .speed = initial_speed,
         };
     }
 
@@ -49,11 +49,11 @@ pub const Ball = struct {
 
         const serve_direction: f32 = if (self.velocity.x > 0) -1 else 1;
 
-        self.velocity.x = serve_direction * INITIAL_SPEED;
-        self.velocity.y = MAX_ANGLE_OFFSET * direction_multiplier;
+        self.velocity.x = serve_direction * initial_speed;
+        self.velocity.y = max_angle_offset * direction_multiplier;
 
         const magnitude = @sqrt(self.velocity.x * self.velocity.x + self.velocity.y * self.velocity.y);
-        self.speed = INITIAL_SPEED;
+        self.speed = initial_speed;
         self.velocity.x = (self.velocity.x / magnitude) * self.speed;
         self.velocity.y = (self.velocity.y / magnitude) * self.speed;
     }
@@ -81,15 +81,15 @@ pub const Ball = struct {
             }
             const paddle_center = paddle.y + paddle.height / 2;
             const hit_offset = (self.position.y - paddle_center) / (paddle.height / 2);
-            self.velocity.y = std.math.clamp(hit_offset, -1, 1) * MAX_ANGLE_OFFSET;
+            self.velocity.y = std.math.clamp(hit_offset, -1, 1) * max_angle_offset;
 
-            self.speed = @min(self.speed + SPEED_INCREMENT, MAX_SPEED);
+            self.speed = @min(self.speed + speed_increment, max_speed);
 
             // Normalise speed based on angle.
             const magnitude = @sqrt(self.velocity.x * self.velocity.x + self.velocity.y * self.velocity.y);
             self.velocity.x = (self.velocity.x / magnitude) * self.speed;
             self.velocity.y = (self.velocity.y / magnitude) * self.speed;
-            assert(self.speed >= INITIAL_SPEED and self.speed <= MAX_SPEED);
+            assert(self.speed >= initial_speed and self.speed <= max_speed);
         }
     }
 };

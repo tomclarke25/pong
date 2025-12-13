@@ -17,10 +17,10 @@ pub const Player = struct {
     paddle_upper_bound: f32,
     paddle_speed_multiplier: f32,
 
-    const PADDLE_WALL_GAP: f32 = 30;
-    const PADDLE_ROUNDNESS: f32 = 0.01;
-    const PADDLE_SEGMENTS: i32 = 1;
-    const PADDLE_LINE_THICKNESS: f32 = 4;
+    const paddle_wall_gap: f32 = 30;
+    const paddle_roundness: f32 = 0.01;
+    const paddle_segments: i32 = 1;
+    const paddle_line_thickness: f32 = 4;
 
     pub fn init(position_x: f32, position_y: f32, paddle_speed_multiplier: f32) Player {
         assert(position_x >= 0);
@@ -32,7 +32,7 @@ pub const Player = struct {
         const wall_bottom = constants.window_height - constants.wall_margin;
         return .{
             .paddle = rl.Rectangle.init(position_x, position_y, paddle_width, paddle_height),
-            .paddle_lower_bound = wall_top + PADDLE_WALL_GAP,
+            .paddle_lower_bound = wall_top + paddle_wall_gap,
             .paddle_upper_bound = wall_bottom - paddle_height,
             .paddle_speed_multiplier = paddle_speed_multiplier,
         };
@@ -45,7 +45,7 @@ pub const Player = struct {
     pub fn draw(self: *const Player) void {
         assert(self.paddle.y >= self.paddle_lower_bound);
         assert(self.paddle.y <= self.paddle_upper_bound);
-        rl.drawRectangleRoundedLinesEx(self.paddle, PADDLE_ROUNDNESS, PADDLE_SEGMENTS, PADDLE_LINE_THICKNESS, paddle_colour);
+        rl.drawRectangleRoundedLinesEx(self.paddle, paddle_roundness, paddle_segments, paddle_line_thickness, paddle_colour);
     }
 
     pub fn update(self: *Player, delta_time: f32, move_action: Action) void {
